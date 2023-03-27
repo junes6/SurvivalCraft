@@ -9,6 +9,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "PlayerFireComponent.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,13 +50,15 @@ ABlasterCharacter::ABlasterCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	FireComp = CreateDefaultSubobject<UPlayerFireComponent>(TEXT("FireComp"));
 }
 
 void ABlasterCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("play"), true);
 	//Add Input Mapping Context
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -73,7 +76,9 @@ void ABlasterCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerI
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+
+		SetUpInputDelegate.Broadcast(EnhancedInputComponent);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("BroadCast"), true);
 		//Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);

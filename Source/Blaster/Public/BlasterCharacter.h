@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "BlasterCharacter.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FSetUpInputDelegate, class UEnhancedInputComponent*);
 
 UCLASS(config=Game)
 class ABlasterCharacter : public ACharacter
@@ -40,7 +41,7 @@ class ABlasterCharacter : public ACharacter
 public:
 	ABlasterCharacter();
 	
-
+	FSetUpInputDelegate SetUpInputDelegate;
 protected:
 
 	/** Called for movement input */
@@ -62,5 +63,8 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+	UPROPERTY(EditAnywhere)
+	class UPlayerFireComponent* FireComp;
 };
 
