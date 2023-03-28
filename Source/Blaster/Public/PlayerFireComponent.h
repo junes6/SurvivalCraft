@@ -7,7 +7,7 @@
 #include "PlayerFireComponent.generated.h"
 
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class BLASTER_API UPlayerFireComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -57,7 +57,18 @@ protected:
 	UFUNCTION()
 	void OffADS();
 
-		
+	UPROPERTY()
+	FTimerHandle ADS_Timer;
+
+	UFUNCTION()
+	void SmoothADS();
+
+	UPROPERTY()
+	class UCameraComponent* cam;
+
+	UPROPERTY()
+	float alpha;
+public:
 };
 
 

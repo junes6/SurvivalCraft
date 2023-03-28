@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "Components/TimelineComponent.h"
 #include "BlasterCharacter.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FSetUpInputDelegate, class UEnhancedInputComponent*);
@@ -43,11 +44,15 @@ public:
 	
 	FSetUpInputDelegate SetUpInputDelegate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera)
-	class UCameraComponent* ADSCamera;
-
 	UPROPERTY(EditAnywhere)
-	class USceneComponent* ADSCamLoc;
+	class USceneComponent* FPS_Scene;
+
+	
+	UPROPERTY(EditAnywhere)
+	class USceneComponent* IronSight_Scene;
+
+/*	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class USceneComponent* ADSCamLoc*/;
 protected:
 
 	/** Called for movement input */
@@ -70,8 +75,41 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UPlayerFireComponent* FireComp;
+	UPROPERTY(EditAnywhere)
+	class UPlayerFireComponent* FireComponent;
+
+	UPROPERTY()
+	FVector FollowCamVector;
+	////타임라인 컴포넌트
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//class UTimelineComponent* timelineComp;
+
+	////타임라인에 사용될 커브 그래프 (블루프린트에서 작성됨)
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//class UCurveFloat* ADSFloat;
+
+	////타임라인이 끝나면 실행될 함수를 바인딩하는 델리게이트
+	//FOnTimelineEvent TimelineFinishedEvent;
+
+	////타임라인 중에 실행될 함수를 바인딩하는 델리게이트
+	//FOnTimelineFloat ADSReturnFunction;
+
+	////타임라인이 끝나면 실행될 함수
+	//UFUNCTION()
+	//void ADSTimelineFinish();
+
+	////타임라인을 실행시키는 함수
+	//UFUNCTION()
+	//void ADSTimelineStart();
+
+	//카메라를 이동시키는 함수
+	//UFUNCTION()
+	//void ADSCamMove(float alpha);
+
+	////조준함수
+	//UFUNCTION(BlueprintImplementableEvent)
+	//void OnADS();
+
 
 };
 

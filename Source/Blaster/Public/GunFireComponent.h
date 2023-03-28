@@ -44,5 +44,8 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AGun_Bullet> bullet;
+
+	UFUNCTION()
+	void SpawnMuzzleEffect();
 		
 };

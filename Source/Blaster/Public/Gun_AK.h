@@ -32,6 +32,9 @@ public:
 
 	UFUNCTION()
 	void GunFireStop();
+
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	class UNiagaraSystem* muzzleEffect;
 protected:
 
 	UPROPERTY(EditAnywhere)

@@ -2,7 +2,8 @@
 
 
 #include "Gun_AK.h"
-
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "BlasterCharacter.h"
 #include "EngineUtils.h"
 #include "GunFireComponent.h"
@@ -47,7 +48,9 @@ void AGun_AK::Tick(float DeltaTime)
 
 void AGun_AK::GunFireStart()
 {
-	if (!GunFire) { return; }
+	if (!GunFire) { GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("GunFire Null"), true);
+		return;
+	}
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("call fire start"), true);
 	GunFire->GunFireStart();
 }
@@ -75,12 +78,16 @@ void AGun_AK::AttachGun()
 	}
 
 	//플레이어가 널이 아니고 컴포넌트가 널이 아니라면
-	if(player&&player->FireComp)
+	if(player&&player->FireComponent)
 	{
-		player->FireComp->GetAK(this);
+		player->FireComponent->GetAK(this);
 		USkeletalMeshComponent* playerMesh = player->GetMesh();
 		this->SetActorLocationAndRotation(playerMesh->GetSocketLocation(FName("gun_r")), playerMesh->GetSocketRotation(FName("gun_r")));
 		meshComp->AttachToComponent(playerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("gun_r"));
 		isAttached = true;
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("FireComp Null"), true);
 	}
 }

@@ -2,9 +2,9 @@
 
 
 #include "GunFireComponent.h"
-
 #include "Gun_AK.h"
 #include "Gun_Bullet.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values for this component's properties
 UGunFireComponent::UGunFireComponent()
@@ -38,13 +38,14 @@ void UGunFireComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 void UGunFireComponent::GunFireStart()
 {
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle_AutoFire, this, &UGunFireComponent::GunFire, 0.2, true);
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle_AutoFire, this, &UGunFireComponent::GunFire, 0.2, true, 0);
 }
 
 void UGunFireComponent::GunFire()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("fire"), true);
 	GetWorld()->SpawnActor<AGun_Bullet>(bullet, gunMesh->GetSocketLocation(FName("Muzzle")), gunMesh->GetSocketRotation(FName("Muzzle")));
+	SpawnMuzzleEffect();
 }
 
 void UGunFireComponent::GunFireStop()
@@ -53,4 +54,12 @@ void UGunFireComponent::GunFireStop()
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandle_AutoFire);
 }
 
+void UGunFireComponent::SpawnMuzzleEffect()
+{
+	if (me->muzzleEffect) {
+		// This spawns the chosen effect on the owning WeaponMuzzle SceneComponent
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(me->muzzleEffect, me->meshComp, FName("muzzleflash"), FVector(0.f), FRotator(0.f), EAttachLocation::Type::KeepRelativeOffset, true);
+	}
+	//NiagaraComp->SetNiagaraVariableFloat(FString("StrengthCoef"), CoefStrength);
+}
 

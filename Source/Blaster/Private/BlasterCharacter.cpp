@@ -48,19 +48,21 @@ ABlasterCharacter::ABlasterCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	ADSCamLoc = CreateDefaultSubobject<USceneComponent>(TEXT("ADSCamLocSceneComp"));
-	ADSCamLoc->SetupAttachment(GetMesh(), TEXT("gun_r"));
+	//ADSCamLoc = CreateDefaultSubobject<USceneComponent>(TEXT("ADSCamLocSceneComp"));
+	//ADSCamLoc->SetupAttachment(GetMesh(), TEXT("gun_r"));
 
-	//Create ADS camera 
-	ADSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ADSCamera"));
-	ADSCamera->SetupAttachment(ADSCamLoc);
-	ADSCamera->SetRelativeLocationAndRotation(ADSCamLoc->GetComponentLocation(), ADSCamLoc->GetComponentRotation());
-	ADSCamera->SetAutoActivate(false);
+	IronSight_Scene = CreateDefaultSubobject<USceneComponent>(TEXT("IronSight"));
+	IronSight_Scene->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
+
+	FPS_Scene = CreateDefaultSubobject<USceneComponent>(TEXT("FPS"));
+	FPS_Scene->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
-	FireComp = CreateDefaultSubobject<UPlayerFireComponent>(TEXT("FireComp"));
+	FireComponent = CreateDefaultSubobject<UPlayerFireComponent>(TEXT("FireComp"));
+
+	//timelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("timelineComponent"));
 }
 
 void ABlasterCharacter::BeginPlay()
@@ -76,6 +78,16 @@ void ABlasterCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
+
+	FollowCamVector = FollowCamera->GetRelativeLocation();
+	/*TimelineFinishedEvent.BindUFunction(this, FName("ASDTimelineFinish"));
+	timelineComp->SetTimelineFinishedFunc(TimelineFinishedEvent);
+	ADSReturnFunction.BindUFunction(this, FName("ADSCamMove"));
+	if(ADSFloat)
+	{
+		timelineComp->AddInterpFloat(ADSFloat, ADSReturnFunction);
+	}
+	timelineComp->SetLooping(false);*/
 }
 
 
@@ -139,6 +151,23 @@ void ABlasterCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
+//타임라인이 끝나면 실행되는 함수
+//void ABlasterCharacter::ADSTimelineFinish()
+//{
+//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("ADS timeline finish"), true);
+//}
+////타임라인을 실행시키는 함수
+//void ABlasterCharacter::ADSTimelineStart()
+//{
+//	timelineComp->PlayFromStart();
+//}
+//타임라인중에 반환값을 받는 함수
+//void ABlasterCharacter::ADSCamMove(float alpha)
+//{
+//	//카메라를 원래 위치에서 조준 위치로 옮긴다
+//	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("timeline"), true);
+//	//ADSCamera->SetRelativeLocation(FMath::Lerp(ADSCamLoc->GetRelativeLocation(), ));
+//}
 
 
 
