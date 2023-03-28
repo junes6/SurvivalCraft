@@ -42,6 +42,12 @@ public:
 	ABlasterCharacter();
 	
 	FSetUpInputDelegate SetUpInputDelegate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera)
+	class UCameraComponent* ADSCamera;
+
+	UPROPERTY(EditAnywhere)
+	class USceneComponent* ADSCamLoc;
 protected:
 
 	/** Called for movement input */
@@ -64,7 +70,8 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UPlayerFireComponent* FireComp;
+
 };
 

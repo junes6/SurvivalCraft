@@ -24,6 +24,7 @@ AGun_AK::AGun_AK()
 	{
 		meshComp->SetSkeletalMesh(TempMesh.Object);
 	}
+	meshComp->SetCollisionProfileName(TEXT("NoCollision"));
 
 	GunFire = CreateDefaultSubobject<UGunFireComponent>(TEXT("GunFire"));
 }
@@ -32,19 +33,22 @@ AGun_AK::AGun_AK()
 void AGun_AK::BeginPlay()
 {
 	Super::BeginPlay();
-	AttachGun();
 }
 
 // Called every frame
 void AGun_AK::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+	if(!isAttached)
+	{
+		AttachGun();
+	}
 }
 
 void AGun_AK::GunFireStart()
 {
 	if (!GunFire) { return; }
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("call fire start"), true);
 	GunFire->GunFireStart();
 }
 
@@ -57,7 +61,8 @@ void AGun_AK::GunFireStop()
 void AGun_AK::AttachGun()
 {
 	ABlasterCharacter* player = nullptr;
-	float maxDistance = 500;
+
+	float maxDistance = 200;
 	for(TActorIterator<ABlasterCharacter> it(GetWorld()); it; ++it)
 	{
 		float distance = GetDistanceTo(*it);
@@ -69,12 +74,13 @@ void AGun_AK::AttachGun()
 		}
 	}
 
-	//플레이어가 있고 컴포넌트가 
+	//플레이어가 널이 아니고 컴포넌트가 널이 아니라면
 	if(player&&player->FireComp)
 	{
 		player->FireComp->GetAK(this);
 		USkeletalMeshComponent* playerMesh = player->GetMesh();
 		this->SetActorLocationAndRotation(playerMesh->GetSocketLocation(FName("gun_r")), playerMesh->GetSocketRotation(FName("gun_r")));
 		meshComp->AttachToComponent(playerMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, FName("gun_r"));
+		isAttached = true;
 	}
 }

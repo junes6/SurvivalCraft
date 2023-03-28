@@ -19,6 +19,9 @@ AGun_Bullet::AGun_Bullet()
 	projectile = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("projectileMovement"));
 	projectile->InitialSpeed = 2000.f;
 	projectile->MaxSpeed = 2000.f;
+	projectile->bRotationFollowsVelocity = true;
+
+	meshComp->SetSimulatePhysics(true);
 	/*ConstructorHelpers::FObjectFinder<UStaticMesh>TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/FPS_Weapon_Bundle/Weapons/Meshes/Ka47/SK_KA47.SK_KA47'"));
 	if (TempMesh.Succeeded())
 	{
@@ -33,6 +36,7 @@ void AGun_Bullet::BeginPlay()
 	Super::BeginPlay();
 
 	meshComp->OnComponentBeginOverlap.AddDynamic(this, &AGun_Bullet::OnBulletOverlap);
+	meshComp->OnComponentHit.AddDynamic(this, &AGun_Bullet::DestroyBullet);
 	
 }
 
@@ -52,4 +56,9 @@ void AGun_Bullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	{
 		//플레이어 데미지
 	}
+}
+
+void AGun_Bullet::DestroyBullet(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Destroy();
 }

@@ -48,6 +48,15 @@ ABlasterCharacter::ABlasterCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	ADSCamLoc = CreateDefaultSubobject<USceneComponent>(TEXT("ADSCamLocSceneComp"));
+	ADSCamLoc->SetupAttachment(GetMesh(), TEXT("gun_r"));
+
+	//Create ADS camera 
+	ADSCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ADSCamera"));
+	ADSCamera->SetupAttachment(ADSCamLoc);
+	ADSCamera->SetRelativeLocationAndRotation(ADSCamLoc->GetComponentLocation(), ADSCamLoc->GetComponentRotation());
+	ADSCamera->SetAutoActivate(false);
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
@@ -68,6 +77,7 @@ void ABlasterCharacter::BeginPlay()
 		}
 	}
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input

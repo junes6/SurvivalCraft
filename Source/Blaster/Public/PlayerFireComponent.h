@@ -32,6 +32,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* IA_Fire;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* IA_ADS;
+
 	UFUNCTION()
 	void GetAK(class AGun_AK* getAk);
 protected:
@@ -47,6 +50,12 @@ protected:
 
 	UFUNCTION()
 	void InputFireCompeleted();
+
+	UFUNCTION()
+	void OnADS();
+
+	UFUNCTION()
+	void OffADS();
 
 		
 };

@@ -6,6 +6,7 @@
 #include "BlasterCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "Gun_AK.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values for this component's properties
 UPlayerFireComponent::UPlayerFireComponent()
@@ -40,6 +41,8 @@ void UPlayerFireComponent::SetupInputComponent(UEnhancedInputComponent* Enhanced
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("bind"), true);
 	EnhancedInputComponent->BindAction(IA_Fire, ETriggerEvent::Started, this, &UPlayerFireComponent::InputFire);
 	EnhancedInputComponent->BindAction(IA_Fire, ETriggerEvent::Completed, this, &UPlayerFireComponent::InputFireCompeleted);
+	EnhancedInputComponent->BindAction(IA_ADS, ETriggerEvent::Started, this, &UPlayerFireComponent::OnADS);
+	EnhancedInputComponent->BindAction(IA_ADS, ETriggerEvent::Completed, this, &UPlayerFireComponent::OffADS);
 }
 
 void UPlayerFireComponent::InitializeComponent()
@@ -70,6 +73,28 @@ void UPlayerFireComponent::InputFireCompeleted()
 	if(ak)
 	{
 		ak->GunFireStop();
+	}
+}
+
+void UPlayerFireComponent::OnADS()
+{
+	//ak가 할당 되어 있다면
+	if(ak)
+	{
+		//ADS 카메라를 조준점으로 옮기면서 활성화 한다
+		me->ADSCamera->SetRelativeLocation(ak->meshComp->GetSocketLocation(FName("ADS")));
+		me->ADSCamera->SetActive(true);
+		me->GetFollowCamera()->SetActive(false);
+	}
+}
+
+void UPlayerFireComponent::OffADS()
+{
+	//ak가 할당 되어 있다면
+	if (ak)
+	{
+		//ADS 카매라를 원래 위치로 옮기고 완료되면 3인칭 카매라를 활성화한다
+		
 	}
 }
 

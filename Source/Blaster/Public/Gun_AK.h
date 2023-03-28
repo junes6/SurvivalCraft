@@ -39,6 +39,9 @@ protected:
 
 	UFUNCTION()
 	void AttachGun();
+
+	UPROPERTY()
+	bool isAttached;
 	
 };
 

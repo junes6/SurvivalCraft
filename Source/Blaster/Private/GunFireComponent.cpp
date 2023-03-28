@@ -43,11 +43,13 @@ void UGunFireComponent::GunFireStart()
 
 void UGunFireComponent::GunFire()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("fire"), true);
 	GetWorld()->SpawnActor<AGun_Bullet>(bullet, gunMesh->GetSocketLocation(FName("Muzzle")), gunMesh->GetSocketRotation(FName("Muzzle")));
 }
 
 void UGunFireComponent::GunFireStop()
 {
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("endFire"), true);
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandle_AutoFire);
 }
 
