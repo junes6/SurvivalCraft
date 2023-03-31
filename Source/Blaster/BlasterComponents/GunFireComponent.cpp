@@ -61,8 +61,14 @@ void UGunFireComponent::GunFire()
 		spawnLoc = gunMesh->GetSocketLocation(FName("Muzzle"));
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("fire"), true);
-	GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, localPlayerCamManager->GetCameraRotation());
-	SpawnMuzzleEffect();
+	GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, player->ADSGun->GetSocketRotation("Muzzle"));
+
+	if(fireAnim)
+	{
+		player->PlayAnimMontage(fireAnim);
+	}
+	
+	//SpawnMuzzleEffect();
 	//카메라 쉐이크
 	//if(fireShakeIns->)
 	if(fireShake)
@@ -70,7 +76,6 @@ void UGunFireComponent::GunFire()
 		if(fireShakeIns&&!fireShakeIns->IsFinished())
 		{
 			fireShakeIns->StopShake(true);
-			
 		}
 		fireShakeIns = localPlayerCamManager->StartCameraShake(fireShake);
 	}

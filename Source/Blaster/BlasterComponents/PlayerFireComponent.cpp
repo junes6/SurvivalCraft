@@ -43,7 +43,7 @@ void UPlayerFireComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 
 	if(bADS)
 	{
-		me->ADSGun->SetRelativeRotation(FRotator(0, 0, -cam->GetRelativeRotation().Pitch));
+		//me->ADSGun->SetRelativeRotation(FRotator(0, 0, -cam->GetRelativeRotation().Pitch));
 		cam->SetWorldLocation(me->ADSGun->GetSocketLocation(FName("ADS")));
 	}
 	
@@ -103,10 +103,11 @@ void UPlayerFireComponent::OnADS()
 		//1인칭 뷰로 전환
 		//me->GetCameraBoom()->SetActive(false);
 		//카메라의 회전을 막아서 설정한 대로 돌아갈수 있게 한다
-		cam->bUsePawnControlRotation = false;
+		me->GetCameraBoom()->SetActive(false);
+		//cam->bUsePawnControlRotation = false;
 		cam->SetRelativeLocation(me->FPS_Scene->GetRelativeLocation());
 		cam->SetWorldRotation(me->GetActorRotation());
-		me->GetCameraBoom()->SetActive(false);
+		
 
 		GetWorld()->GetTimerManager().SetTimer(ADS_Timer, this, &UPlayerFireComponent::SmoothADS, 0.01, true, 0);
 		//cam->SetWorldLocation(ak->meshComp->GetSocketLocation(FName("ADS")));

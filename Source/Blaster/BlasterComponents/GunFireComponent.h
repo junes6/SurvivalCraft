@@ -68,4 +68,7 @@ protected:
 
 	UPROPERTY()
 	int32 recoilCount = 0;
+
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* fireAnim;
 };

@@ -99,4 +99,5 @@ protected:
 
 	UPROPERTY()
 	bool isAttached;
+
 };
