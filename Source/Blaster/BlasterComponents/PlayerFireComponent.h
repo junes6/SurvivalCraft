@@ -68,4 +68,8 @@ public:
 
 	UPROPERTY();
 	bool bADS = false;
+
+	//조준이 시작했는지 판별하는 bool
+	UPROPERTY();
+	bool bADS_Start = false;
 };

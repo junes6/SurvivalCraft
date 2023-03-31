@@ -28,7 +28,6 @@ void UPlayerFireComponent::BeginPlay()
 
 	cam = me->GetFollowCamera();
 
-	//소유자에게서 timelineComp를 받아온다
 	me->bUseControllerRotationYaw = true;
 
 	//무기 가져오기 델리게이트 바인딩
@@ -71,8 +70,11 @@ void UPlayerFireComponent::InitializeComponent()
 
 void UPlayerFireComponent::GetAK(AWeapon* getAk)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Get AK"), true);
-	ak = getAk;
+	//if(me&&me->GetController()&&me->GetController()->IsLocalController())
+	//{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Get AK"), true);
+		ak = getAk;
+	//}
 }
 
 void UPlayerFireComponent::InputFire()
@@ -102,6 +104,9 @@ void UPlayerFireComponent::OnADS()
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("OnADS"), true);
 		//1인칭 뷰로 전환
 		//me->GetCameraBoom()->SetActive(false);
+
+		//조준 시작을 참으로
+		bADS_Start = true;
 		//카메라의 회전을 막아서 설정한 대로 돌아갈수 있게 한다
 		me->GetCameraBoom()->SetActive(false);
 		//cam->bUsePawnControlRotation = false;
@@ -130,9 +135,11 @@ void UPlayerFireComponent::OffADS()
 		cam->bUsePawnControlRotation = true;
 		//스프링암을 활성화 한다
 		me->GetCameraBoom()->SetActive(true);
+		me->GetMesh()->SetOwnerNoSee(false);
 		//me->bUseControllerRotationPitch = false;
 		//ADS 상태를 비활성화한다
 		bADS = false;
+		bADS_Start = false;
 	}
 }
 
@@ -148,6 +155,10 @@ void UPlayerFireComponent::SmoothADS()
 		//카메라 회전가능
 		cam->bUsePawnControlRotation = true;
 		bADS = true;
+
+		//자기 캐릭터의 매쉬가 조준중에는 안보이게 한다
+		me->GetMesh()->SetOwnerNoSee(true);
+
 		//me->ADSGun->AttachToComponent(c);
 		//카메라가 상하좌우로 회전하게 한다
 		//me->bUseControllerRotationYaw = true;

@@ -52,7 +52,7 @@ void UGunFireComponent::GunFireStart()
 void UGunFireComponent::GunFire()
 {
 	FVector spawnLoc;
-	if(player->FireComponent->bADS)
+	if(player->FireComponent->bADS_Start)
 	{
 		spawnLoc = player->ADSGun->GetSocketLocation(FName("Muzzle"));
 	}
