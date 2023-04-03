@@ -58,7 +58,8 @@ void UCombatComponent::EquipWeapon(class AWeapon* WeaponToEquip)
 	}
 
 	//델리게이트 브로드케스트 PlayerFireComponent에서 받는다
-	setUpWeapon.Broadcast(WeaponToEquip);
+	ABlasterCharacter* player = Cast<ABlasterCharacter>(GetOwner());
+	setUpWeapon.Broadcast(WeaponToEquip, player);
 
 	// 무기 부착하기
 	EquippedWeapon = WeaponToEquip;

@@ -4,6 +4,7 @@
 #include "BlasterAnimInstance.h"
 #include "BlasterCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 void UBlasterAnimInstance::NativeInitializeAnimation()
 {
@@ -45,4 +46,19 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	bIsCrouched = BlasterCharacter->bIsCrouched;
 
 	bAiming = BlasterCharacter->IsAiming();
+
+	FRotator viewRot = BlasterCharacter->GetBaseAimRotation();
+	FRotator playerRot = BlasterCharacter->GetActorRotation();
+	FRotator deltaRot = playerRot - viewRot;
+	playerAimPitch = FMath::Clamp(deltaRot.GetNormalized().Pitch, -45.f, 45.f);
+
+	
 }
+
+//void UBlasterAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+//{
+	//Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//weaponPitch 값이 동기화되어서 총알의 스폰 위치를 일치하게한다
+	//DOREPLIFETIME(UBlasterAnimInstance, playerAimPitch);
+//}

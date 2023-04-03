@@ -31,13 +31,14 @@ public:
 	virtual void InitializeComponent() override;
 
 	UFUNCTION()
-	void GetAK(class AWeapon* getAk);
+	void GetAK(class AWeapon* getAk, class ABlasterCharacter* player);
+
 protected:
 
 	UPROPERTY()
 	class ABlasterCharacter* me;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	class AWeapon* ak;
 
 	UFUNCTION()

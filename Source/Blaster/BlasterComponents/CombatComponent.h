@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "CombatComponent.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FSetUpWeapon, class AWeapon*);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FSetUpWeapon, class AWeapon*, class ABlasterCharacter*);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLASTER_API UCombatComponent : public UActorComponent

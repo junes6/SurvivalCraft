@@ -9,6 +9,7 @@
 #include "Blaster/Weapon/Gun_Bullet.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UGunFireComponent::UGunFireComponent()
@@ -32,7 +33,7 @@ void UGunFireComponent::BeginPlay()
 	//UGameplayStatics::GetPlayerPawn
 	localPlayerCamManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 
-	player = Cast<ABlasterCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	//player = Cast<ABlasterCharacter>(GetOwner());
 }
 
 
@@ -51,21 +52,24 @@ void UGunFireComponent::GunFireStart()
 
 void UGunFireComponent::GunFire()
 {
-	FVector spawnLoc;
+	FVector spawnLoc; FRotator spawnRot;
 	if(player->FireComponent->bADS_Start)
 	{
 		spawnLoc = player->ADSGun->GetSocketLocation(FName("Muzzle"));
+		spawnRot = player->ADSGun->GetSocketRotation(FName("Muzzle"));
 	}
 	else
 	{
 		spawnLoc = gunMesh->GetSocketLocation(FName("Muzzle"));
+		spawnRot = gunMesh->GetSocketRotation(FName("Muzzle"));
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("fire"), true);
-	GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, player->ADSGun->GetSocketRotation("Muzzle"));
+
+	SpawnBullet(spawnLoc, spawnRot);
 
 	if(fireAnim)
 	{
-		player->PlayAnimMontage(fireAnim);
+		ServerPlayFireAnim(player->FireComponent->bADS_Start);
+		//me->meshComp->PlayAnimation(fireAnim, false);
 	}
 	
 	//SpawnMuzzleEffect();
@@ -125,3 +129,43 @@ void UGunFireComponent::Recoil()
 	}
 }
 
+void UGunFireComponent::MulticastPlayFireAnim_Implementation(bool bADS)
+{
+	if(bADS)
+	{
+		player->ADSGun->GetAnimInstance()->Montage_Play(fireAnim, 1);
+	}
+	else
+	{
+		gunMesh->GetAnimInstance()->Montage_Play(fireAnim, 1);
+	}
+	
+}
+
+void UGunFireComponent::ServerPlayFireAnim_Implementation(bool bADS)
+{
+	MulticastPlayFireAnim(bADS);
+}
+
+void UGunFireComponent::MulitSpawnBullet_Implementation(FVector spawnLoc, FRotator spawnRot)
+{
+	GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, spawnRot);
+}
+
+//클라이언트의 로테이션을 받는다
+void UGunFireComponent::SpawnBullet_Implementation(FVector spawnLoc, FRotator spawnRot)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("fire"), true);
+	//GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, spawnRot);
+	MulitSpawnBullet(spawnLoc, spawnRot);
+}
+
+void UGunFireComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	//값이 동기화되어서 총알의 스폰 위치를 일치하게한다
+	DOREPLIFETIME(UGunFireComponent, RepspawnLoc);
+	DOREPLIFETIME(UGunFireComponent, RepspawnRot);
+	DOREPLIFETIME(UGunFireComponent, player);
+}

@@ -92,11 +92,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Effect")
 	class UNiagaraSystem* muzzleEffect;
-protected:
 
 	UPROPERTY(EditAnywhere)
 	class UGunFireComponent* GunFire;
-
+protected:
 	UPROPERTY()
 	bool isAttached;
 

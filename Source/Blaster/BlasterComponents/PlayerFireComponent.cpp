@@ -4,10 +4,12 @@
 #include "PlayerFireComponent.h"
 
 #include "CombatComponent.h"
+#include "GunFireComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UPlayerFireComponent::UPlayerFireComponent()
@@ -68,14 +70,42 @@ void UPlayerFireComponent::InitializeComponent()
 	me->SetUpInputDelegate.AddUObject(this, &UPlayerFireComponent::SetupInputComponent);
 }
 
-void UPlayerFireComponent::GetAK(AWeapon* getAk)
+void UPlayerFireComponent::GetAK(AWeapon* getAk, ABlasterCharacter* player)
 {
-	//if(me&&me->GetController()&&me->GetController()->IsLocalController())
-	//{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Get AK"), true);
+	if (!getAk)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Get Weapon Failed"), true);
+	}
+	else
+	{
 		ak = getAk;
-	//}
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Get AK"), true);
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, FString::Printf(TEXT("%s"), *ak->GetName()), true);
+
+		//ak에 Owner를 넣는다
+		ak->SetOwner(player);
+		ak->GunFire->player = player;
+	}
 }
+
+//void UPlayerFireComponent::GetAK(AWeapon* getAk)
+//{
+//	//if(me&&me->GetController()&&me->GetController()->IsLocalController())
+//	//{
+//	if(!getAk)
+//	{
+//		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Get Weapon Failed"), true);
+//	}
+//	else
+//	{
+//		ak = getAk;
+//		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("Get AK"), true);
+//		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, FString::Printf(TEXT("%s"), *ak->GetName()), true);
+//	}
+//
+//		
+//	//}
+//}
 
 void UPlayerFireComponent::InputFire()
 {
@@ -164,4 +194,11 @@ void UPlayerFireComponent::SmoothADS()
 		//me->bUseControllerRotationYaw = true;
 		//me->bUseControllerRotationPitch = true;
 	}
+}
+
+void UPlayerFireComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UPlayerFireComponent, ak);
 }

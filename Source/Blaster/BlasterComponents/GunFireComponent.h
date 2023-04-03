@@ -32,6 +32,9 @@ public:
 
 	UFUNCTION()
 	void GunFireStop();
+
+	UPROPERTY(Replicated)
+	class ABlasterCharacter* player;
 protected:
 	UPROPERTY()
 	class AWeapon* me;
@@ -54,9 +57,6 @@ protected:
 	UPROPERTY()
 	APlayerCameraManager* localPlayerCamManager;
 
-	UPROPERTY()
-	class ABlasterCharacter* player;
-
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UCameraShakeBase> fireShake;
 
@@ -71,4 +71,22 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* fireAnim;
+
+	UFUNCTION(Server, Unreliable)
+	void SpawnBullet(FVector spawnLoc, FRotator spawnRot);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulitSpawnBullet(FVector spawnLoc, FRotator spawnRot);
+
+	UPROPERTY(Replicated)
+	FVector RepspawnLoc;
+
+	UPROPERTY(Replicated)
+	FRotator RepspawnRot;
+
+	UFUNCTION(Server, Unreliable)
+	void ServerPlayFireAnim(bool bADS);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastPlayFireAnim(bool bADS);
 };

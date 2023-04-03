@@ -19,9 +19,10 @@ public:
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	UPROPERTY(EditDefaultsOnly, BluePrintReadOnly, Category = AnimSetting)
+	UPROPERTY(Replicated, EditDefaultsOnly, BluePrintReadOnly, Category = AnimSetting)
 	float weaponPitch = 0;
 
 	UPROPERTY()
 	class ABlasterCharacter* player;
+
 };
