@@ -64,7 +64,7 @@ void UGunFireComponent::GunFire()
 		spawnRot = gunMesh->GetSocketRotation(FName("Muzzle"));
 	}
 
-	SpawnBullet(spawnLoc, spawnRot);
+	ServerSpawnBullet(spawnLoc, spawnRot);
 
 	if(fireAnim)
 	{
@@ -81,7 +81,7 @@ void UGunFireComponent::GunFire()
 		{
 			fireShakeIns->StopShake(true);
 		}
-		fireShakeIns = localPlayerCamManager->StartCameraShake(fireShake);
+		fireShakeIns = localPlayerCamManager->StartCameraShake(fireShake, 0.5);
 	}
 
 	//반동
@@ -149,15 +149,19 @@ void UGunFireComponent::ServerPlayFireAnim_Implementation(bool bADS)
 
 void UGunFireComponent::MulitSpawnBullet_Implementation(FVector spawnLoc, FRotator spawnRot)
 {
-	GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, spawnRot);
+	
 }
 
 //클라이언트의 로테이션을 받는다
-void UGunFireComponent::SpawnBullet_Implementation(FVector spawnLoc, FRotator spawnRot)
+void UGunFireComponent::ServerSpawnBullet_Implementation(FVector spawnLoc, FRotator spawnRot)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("fire"), true);
 	//GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, spawnRot);
-	MulitSpawnBullet(spawnLoc, spawnRot);
+	AGun_Bullet* SpawnedBullet = GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, spawnRot);
+
+	//player fire에서 받은 이 총의 소유 player를 스폰한 총알의 오너로 설정한다
+	SpawnedBullet->SetOwner(player);
+	SpawnedBullet->gunFireComp = this;
 }
 
 void UGunFireComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

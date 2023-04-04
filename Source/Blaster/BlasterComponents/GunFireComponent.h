@@ -35,6 +35,10 @@ public:
 
 	UPROPERTY(Replicated)
 	class ABlasterCharacter* player;
+
+	UPROPERTY(EditAnywhere)
+	int32 weaponPower = 5;
+
 protected:
 	UPROPERTY()
 	class AWeapon* me;
@@ -73,7 +77,7 @@ protected:
 	class UAnimMontage* fireAnim;
 
 	UFUNCTION(Server, Unreliable)
-	void SpawnBullet(FVector spawnLoc, FRotator spawnRot);
+	void ServerSpawnBullet(FVector spawnLoc, FRotator spawnRot);
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void MulitSpawnBullet(FVector spawnLoc, FRotator spawnRot);

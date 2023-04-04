@@ -35,6 +35,12 @@ protected:
 	void Lookup(float Value);
 	void EquipButtonPressed();
 
+	UPROPERTY(Replicated)
+	int32 curHP;
+
+	UPROPERTY(EditAnywhere)
+	int32 maxHP = 100;
+
 private:
 	// 스프링암 컴포넌트 추가
 	UPROPERTY(VisibleAnywhere, Category="Camera")
@@ -98,4 +104,13 @@ public:
 
 	UPROPERTY()
 	FVector FollowCamVector;
+
+	UFUNCTION()
+	FORCEINLINE int32 Get_curHP(){ return curHP; };
+
+	UFUNCTION()
+	void DecreaseHP(int32 value);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerOnDamage(int32 value);
 };

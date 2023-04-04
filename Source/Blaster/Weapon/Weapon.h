@@ -95,6 +95,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class UGunFireComponent* GunFire;
+
 protected:
 	UPROPERTY()
 	bool isAttached;

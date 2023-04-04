@@ -62,6 +62,8 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	// 복제할 무기를 등록
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 
+	DOREPLIFETIME(ABlasterCharacter, curHP);
+
 }
 
 void ABlasterCharacter::PostInitializeComponents()
@@ -81,6 +83,12 @@ void ABlasterCharacter::BeginPlay()
 	Super::BeginPlay();
 	
 	FollowCamVector = FollowCamera->GetRelativeLocation();
+
+	//서버에서 hp를 변경하고 복제된다
+	if(HasAuthority())
+	{
+		curHP = maxHP;
+	}
 }
 
 void ABlasterCharacter::Tick(float DeltaTime)
@@ -248,6 +256,17 @@ bool ABlasterCharacter::IsAiming()
 	}*/
 	// 전투컴포넌트를 연결시켜준다.
 	return (Combat && Combat->bAiming);
+}
+
+void ABlasterCharacter::DecreaseHP(int32 value)
+{
+	curHP -= value;
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("%d"), curHP));
+}
+
+void ABlasterCharacter::ServerOnDamage_Implementation(int32 value)
+{
+	DecreaseHP(value);
 }
 
 
