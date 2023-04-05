@@ -14,9 +14,12 @@ class BLASTER_API ABlasterPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UPlayerUIWidget> playerUI;
+
+	UPROPERTY()
+	class UPlayerUIWidget* playerUIWidget;
 };

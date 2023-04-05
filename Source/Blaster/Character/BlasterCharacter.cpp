@@ -10,7 +10,11 @@
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include <GameFramework/CharacterMovementComponent.h>
 
+#include "BlasterPlayerController.h"
 #include "Blaster/BlasterComponents/PlayerFireComponent.h"
+#include "Blaster/HUD/PlayerUIWidget.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -63,6 +67,8 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME_CONDITION(ABlasterCharacter, OverlappingWeapon, COND_OwnerOnly);
 
 	DOREPLIFETIME(ABlasterCharacter, curHP);
+	DOREPLIFETIME(ABlasterCharacter, ammo);
+	DOREPLIFETIME(ABlasterCharacter, GunFire);
 
 }
 
@@ -150,6 +156,19 @@ void ABlasterCharacter::EquipButtonPressed()
 
 		}
 	}
+}
+
+void ABlasterCharacter::OnRep_SetHP_Persent()
+{
+	/*if(GetController()->IsLocalController())
+	{
+		ABlasterPlayerController* pc = Cast<ABlasterPlayerController>(GetController());
+		if(pc && pc->playerUIWidget)
+		{
+			pc->playerUIWidget->text_HP->SetText(FText::AsNumber(curHP));
+			pc->playerUIWidget->pb_HP->SetPercent(curHP/maxHP);
+		}
+	}*/
 }
 
 // 구현부에는 _Implementation을 붙여준다.
@@ -262,6 +281,28 @@ void ABlasterCharacter::DecreaseHP(int32 value)
 {
 	curHP -= value;
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("%d"), curHP));
+
+	if(curHP <= 0)
+	{
+		DieProcess();
+	}
+}
+
+void ABlasterCharacter::DieProcess()
+{
+	MultiPlayDie();
+
+	if(GetController() && GetController()->IsLocalController())
+	{
+		
+	}
+}
+
+void ABlasterCharacter::MultiPlayDie_Implementation()
+{
+	
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("play die"));
+	PlayAnimMontage(Anim_Die);
 }
 
 void ABlasterCharacter::ServerOnDamage_Implementation(int32 value)

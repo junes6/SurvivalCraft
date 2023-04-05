@@ -35,11 +35,11 @@ protected:
 	void Lookup(float Value);
 	void EquipButtonPressed();
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, ReplicatedUsing= OnRep_SetHP_Persent)
 	int32 curHP;
 
-	UPROPERTY(EditAnywhere)
-	int32 maxHP = 100;
+	UFUNCTION()
+	void OnRep_SetHP_Persent();
 
 private:
 	// 스프링암 컴포넌트 추가
@@ -83,6 +83,9 @@ public:
 
 	bool IsAiming();
 
+	UPROPERTY(EditAnywhere)
+	int32 maxHP = 100;
+
 	FSetUpInputDelegate SetUpInputDelegate;
 
 	UPROPERTY(EditAnywhere)
@@ -113,4 +116,23 @@ public:
 
 	UFUNCTION(Server, Unreliable)
 	void ServerOnDamage(int32 value);
+
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* Anim_Reload;
+
+	UPROPERTY(Replicated)
+	int32 ammo;
+
+	UPROPERTY(Replicated)
+	class UGunFireComponent* GunFire;
+
+	UFUNCTION()
+	void DieProcess();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MultiPlayDie();
+
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* Anim_Die;
+
 };

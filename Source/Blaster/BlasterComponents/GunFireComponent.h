@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "GunFireComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoCount, int32, ammoCount);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BLASTER_API UGunFireComponent : public UActorComponent
@@ -16,6 +17,7 @@ public:
 	// Sets default values for this component's properties
 	UGunFireComponent();
 
+	FOnAmmoCount AmmoCountDeleGate;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -39,6 +41,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 weaponPower = 5;
 
+	UPROPERTY(EditAnywhere)
+	int32 maxAmmo = 30;
+
+	UPROPERTY(Replicated)
+	int32 ammo;
+
+	UFUNCTION(Server, Unreliable)
+	void ServerReload();
 protected:
 	UPROPERTY()
 	class AWeapon* me;

@@ -59,6 +59,7 @@ void UPlayerFireComponent::SetupInputComponent(UInputComponent* EnhancedInputCom
 	EnhancedInputComponent->BindAction(TEXT("Fire"), IE_Released, this, &UPlayerFireComponent::InputFireCompeleted);
 	EnhancedInputComponent->BindAction(TEXT("ADS"), IE_Pressed, this, &UPlayerFireComponent::OnADS);
 	EnhancedInputComponent->BindAction(TEXT("ADS"), IE_Released, this, &UPlayerFireComponent::OffADS);
+	EnhancedInputComponent->BindAction(TEXT("Reload"), IE_Pressed, this, &UPlayerFireComponent::Reload);
 }
 
 void UPlayerFireComponent::InitializeComponent()
@@ -83,8 +84,14 @@ void UPlayerFireComponent::GetAK(AWeapon* getAk, ABlasterCharacter* player)
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, FString::Printf(TEXT("%s"), *ak->GetName()), true);
 
 		//ak에 Owner를 넣는다
-		ak->SetOwner(player);
-		ak->GunFire->player = player;
+		getAk->SetOwner(player);
+		getAk->GunFire->player = player;
+
+		//플레이어에 컴포넌트를 넣는다
+		player->GunFire = getAk->GunFire;
+
+		//총에있는 총알 수를 플레이어에 넣는다
+		player->ammo = getAk->GunFire->ammo;
 	}
 }
 
@@ -194,6 +201,25 @@ void UPlayerFireComponent::SmoothADS()
 		//me->bUseControllerRotationYaw = true;
 		//me->bUseControllerRotationPitch = true;
 	}
+}
+
+void UPlayerFireComponent::Reload()
+{
+	if(ak)
+	{
+		ServerReload();
+	}
+}
+
+void UPlayerFireComponent::MultiReload_Implementation()
+{
+	me->PlayAnimMontage(me->Anim_Reload, 1);
+}
+
+void UPlayerFireComponent::ServerReload_Implementation()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Serverreloadinput"));
+	MultiReload();
 }
 
 void UPlayerFireComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

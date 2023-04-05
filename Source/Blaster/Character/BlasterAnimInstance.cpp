@@ -3,6 +3,9 @@
 
 #include "BlasterAnimInstance.h"
 #include "BlasterCharacter.h"
+#include "Blaster/BlasterComponents/GunFireComponent.h"
+#include "Blaster/BlasterComponents/PlayerFireComponent.h"
+#include "Blaster/Weapon/Weapon.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -53,6 +56,15 @@ void UBlasterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	playerAimPitch = FMath::Clamp(deltaRot.GetNormalized().Pitch, -45.f, 45.f);
 
 	
+}
+
+void UBlasterAnimInstance::AnimNotify_ReloadingEnd()
+{
+	//로컬 컨트롤러만 서버에 RPC로 장전을 요청한다
+	if(BlasterCharacter->GetController() && BlasterCharacter->GetController()->IsLocalController())
+	{
+		BlasterCharacter->GunFire->ServerReload();
+	}
 }
 
 //void UBlasterAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

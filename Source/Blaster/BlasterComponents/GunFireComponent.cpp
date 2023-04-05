@@ -33,9 +33,12 @@ void UGunFireComponent::BeginPlay()
 	//UGameplayStatics::GetPlayerPawn
 	localPlayerCamManager = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
 
+	if(me->HasAuthority())
+	{
+		ammo = maxAmmo;
+	}
 	//player = Cast<ABlasterCharacter>(GetOwner());
 }
-
 
 // Called every frame
 void UGunFireComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -52,6 +55,8 @@ void UGunFireComponent::GunFireStart()
 
 void UGunFireComponent::GunFire()
 {
+	if(ammo <= 0) { return; }
+
 	FVector spawnLoc; FRotator spawnRot;
 	if(player->FireComponent->bADS_Start)
 	{
@@ -129,6 +134,12 @@ void UGunFireComponent::Recoil()
 	}
 }
 
+void UGunFireComponent::ServerReload_Implementation()
+{
+	ammo = maxAmmo;
+	player->ammo = ammo;
+}
+
 void UGunFireComponent::MulticastPlayFireAnim_Implementation(bool bADS)
 {
 	if(bADS)
@@ -152,7 +163,7 @@ void UGunFireComponent::MulitSpawnBullet_Implementation(FVector spawnLoc, FRotat
 	
 }
 
-//클라이언트의 로테이션을 받는다
+//클라이언트의 로테이션을 받는다 (서버실행)
 void UGunFireComponent::ServerSpawnBullet_Implementation(FVector spawnLoc, FRotator spawnRot)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("fire"), true);
@@ -162,6 +173,11 @@ void UGunFireComponent::ServerSpawnBullet_Implementation(FVector spawnLoc, FRota
 	//player fire에서 받은 이 총의 소유 player를 스폰한 총알의 오너로 설정한다
 	SpawnedBullet->SetOwner(player);
 	SpawnedBullet->gunFireComp = this;
+
+	//총알을 소모한다
+	
+	ammo--;
+	player->ammo = ammo;
 }
 
 void UGunFireComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -172,4 +188,5 @@ void UGunFireComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(UGunFireComponent, RepspawnLoc);
 	DOREPLIFETIME(UGunFireComponent, RepspawnRot);
 	DOREPLIFETIME(UGunFireComponent, player);
+	DOREPLIFETIME(UGunFireComponent, ammo);
 }

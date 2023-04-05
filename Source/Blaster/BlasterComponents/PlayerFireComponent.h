@@ -33,13 +33,13 @@ public:
 	UFUNCTION()
 	void GetAK(class AWeapon* getAk, class ABlasterCharacter* player);
 
+	UPROPERTY(Replicated)
+	class AWeapon* ak;
+
 protected:
 
 	UPROPERTY()
 	class ABlasterCharacter* me;
-
-	UPROPERTY(Replicated)
-	class AWeapon* ak;
 
 	UFUNCTION()
 	void InputFire();
@@ -73,4 +73,13 @@ public:
 	//조준이 시작했는지 판별하는 bool
 	UPROPERTY();
 	bool bADS_Start = false;
+
+	UFUNCTION()
+	void Reload();
+
+	UFUNCTION(Server, Unreliable)
+	void ServerReload();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MultiReload();
 };
