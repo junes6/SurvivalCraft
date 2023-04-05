@@ -22,4 +22,7 @@ public:
 
 	UPROPERTY()
 	class UPlayerUIWidget* playerUIWidget;
+
+	UFUNCTION()
+	void Respawn(class ABlasterCharacter* player);
 };

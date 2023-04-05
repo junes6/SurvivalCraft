@@ -28,7 +28,22 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, meta=(BindWidget))
 	class UProgressBar* pb_HP;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
+	class UWidgetSwitcher* WS_WidgetSwitcher;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, meta = (BindWidget))
+	class UProgressBar* pb_respawn;
+
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	class UWidgetAnimation* Anim_Respawn;
+
 	UPROPERTY()
 	class ABlasterCharacter* player;
+
+	UFUNCTION()
+	void SetRespawnWidget();
+
+	UFUNCTION()
+	void SetCombatWidget();
 	
 };

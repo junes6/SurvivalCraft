@@ -10,9 +10,13 @@
 #include "Blaster/BlasterComponents/CombatComponent.h"
 #include <GameFramework/CharacterMovementComponent.h>
 
+#include "BlasterAnimInstance.h"
 #include "BlasterPlayerController.h"
+#include "MySpectatorPawn.h"
 #include "Blaster/BlasterComponents/PlayerFireComponent.h"
+#include "Blaster/GameMode/BlasterGameMode.h"
 #include "Blaster/HUD/PlayerUIWidget.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 
@@ -90,6 +94,9 @@ void ABlasterCharacter::BeginPlay()
 	
 	FollowCamVector = FollowCamera->GetRelativeLocation();
 
+	animInstance = Cast<UBlasterAnimInstance>(GetMesh()->GetAnimInstance());
+
+	pc = Cast<ABlasterPlayerController>(GetController());
 	//서버에서 hp를 변경하고 복제된다
 	if(HasAuthority())
 	{
@@ -292,17 +299,83 @@ void ABlasterCharacter::DieProcess()
 {
 	MultiPlayDie();
 
-	if(GetController() && GetController()->IsLocalController())
+	
+		FTimerHandle TimerHandle_Death;
+		GetWorldTimerManager().SetTimer(TimerHandle_Death, FTimerDelegate::CreateLambda([&]()
+		{
+			//게임모드가 있는 서버에서 포제스를 한다
+			if(HasAuthority())
+			{
+				ChangeSpectatorMode();
+			}
+
+			//위젯이 있는 로컬 플레이어에서 위젯을 설정한다
+			if(GetController() && GetController()->IsLocalController())
+			{
+				if(pc->playerUIWidget)
+				{
+					pc->playerUIWidget->SetRespawnWidget();
+					SetWidget();
+				}
+			}
+		}), 1.5f, false);
+	
+}
+
+void ABlasterCharacter::ChangeSpectatorMode()
+{
+	ABlasterGameMode* gm = Cast<ABlasterGameMode>(GetWorld()->GetAuthGameMode());
+	if(gm)
 	{
-		
+		FActorSpawnParameters param;
+		param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		blasterSpectator = GetWorld()->SpawnActor<AMySpectatorPawn>(TSub_spectatorPawn, GetActorLocation(), GetActorRotation(), param);
+		if (blasterSpectator != nullptr)
+		{
+			GetController()->Possess(blasterSpectator);
+		}
+
+		FTimerHandle TimerHandle_Respawn;
+		GetWorldTimerManager().SetTimer(TimerHandle_Respawn, FTimerDelegate::CreateLambda([&]()
+			{
+			//BP에 spectator설정
+				blasterSpectator->GetController()->Possess(this);
+				blasterSpectator->Destroy();
+			//pc가 캐스팅되지 않으면 다시 캐스팅한다
+				Respawn:
+				if(pc)
+				{
+					pc->Respawn(this);
+				}
+				else
+				{
+					pc = Cast<ABlasterPlayerController>(GetController());
+					goto Respawn;
+				}
+			}), respawnTime, false);
 	}
+}
+
+void ABlasterCharacter::SetWidget()
+{
+
+	FTimerHandle TimerHandle_Respawn;
+	GetWorldTimerManager().SetTimer(TimerHandle_Respawn, FTimerDelegate::CreateLambda([&]()
+		{
+			pc->playerUIWidget->SetCombatWidget();
+			;
+		}), respawnTime, false);
 }
 
 void ABlasterCharacter::MultiPlayDie_Implementation()
 {
 	
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("play die"));
-	PlayAnimMontage(Anim_Die);
+	animInstance->bDie = true;
+	GetCharacterMovement()->DisableMovement();
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	bUseControllerRotationYaw = false;
 }
 
 void ABlasterCharacter::ServerOnDamage_Implementation(int32 value)

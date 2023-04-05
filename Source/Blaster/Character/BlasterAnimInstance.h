@@ -47,4 +47,8 @@ private:
 
 	UFUNCTION()
 	void AnimNotify_ReloadingEnd();
+
+public:
+	UPROPERTY(BlueprintReadOnly, Category="Movement")
+	bool bDie;
 };

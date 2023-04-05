@@ -3,12 +3,14 @@
 
 #include "PlayerUIWidget.h"
 
+#include "Animation/UMGSequencePlayer.h"
 #include "Blaster/BlasterComponents/GunFireComponent.h"
 #include "Blaster/BlasterComponents/PlayerFireComponent.h"
 #include "Blaster/Character/BlasterCharacter.h"
 #include "Blaster/Weapon/Weapon.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/WidgetSwitcher.h"
 
 void UPlayerUIWidget::NativeConstruct()
 {
@@ -19,7 +21,7 @@ void UPlayerUIWidget::NativeConstruct()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Emerald, TEXT("Widget player Cast"));
 	}
-
+	WS_WidgetSwitcher->SetActiveWidgetIndex(0);
 }
 
 void UPlayerUIWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -34,4 +36,15 @@ void UPlayerUIWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	text_Ammo->SetText(FText::AsNumber(player->ammo));
 
 	pb_HP->SetPercent(percent);
+}
+
+void UPlayerUIWidget::SetRespawnWidget()
+{
+	WS_WidgetSwitcher->SetActiveWidgetIndex(1);
+	PlayAnimation(Anim_Respawn);
+}
+
+void UPlayerUIWidget::SetCombatWidget()
+{
+	WS_WidgetSwitcher->SetActiveWidgetIndex(0);
 }

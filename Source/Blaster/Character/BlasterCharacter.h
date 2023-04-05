@@ -135,4 +135,25 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* Anim_Die;
 
+	UPROPERTY()
+	class UBlasterAnimInstance* animInstance;
+
+	UPROPERTY()
+	class ABlasterPlayerController* pc;
+
+	UFUNCTION()
+	void ChangeSpectatorMode();
+
+	UFUNCTION()
+	void SetWidget();
+
+	UPROPERTY()
+	class AMySpectatorPawn* blasterSpectator;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AMySpectatorPawn> TSub_spectatorPawn;
+
+	UPROPERTY(EditAnywhere, Category=MySetting)
+	float respawnTime = 4;
+
 };

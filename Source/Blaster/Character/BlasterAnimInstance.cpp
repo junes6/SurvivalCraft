@@ -69,8 +69,8 @@ void UBlasterAnimInstance::AnimNotify_ReloadingEnd()
 
 //void UBlasterAnimInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 //{
-	//Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	//weaponPitch 값이 동기화되어서 총알의 스폰 위치를 일치하게한다
-	//DOREPLIFETIME(UBlasterAnimInstance, playerAimPitch);
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//
+//	weaponPitch 값이 동기화되어서 총알의 스폰 위치를 일치하게한다
+//	DOREPLIFETIME(UBlasterAnimInstance, bDie);
 //}
