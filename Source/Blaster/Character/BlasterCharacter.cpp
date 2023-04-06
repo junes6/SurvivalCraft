@@ -11,7 +11,9 @@
 #include <GameFramework/CharacterMovementComponent.h>
 
 #include "BlasterAnimInstance.h"
+#include "BlasterGameInstance.h"
 #include "BlasterPlayerController.h"
+#include "BlasterPlayerState.h"
 #include "MySpectatorPawn.h"
 #include "Blaster/BlasterComponents/PlayerFireComponent.h"
 #include "Blaster/GameMode/BlasterGameMode.h"
@@ -19,6 +21,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "GameFramework/PlayerState.h"
 
 // Sets default values
 ABlasterCharacter::ABlasterCharacter()
@@ -73,6 +76,8 @@ void ABlasterCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(ABlasterCharacter, curHP);
 	DOREPLIFETIME(ABlasterCharacter, ammo);
 	DOREPLIFETIME(ABlasterCharacter, GunFire);
+	DOREPLIFETIME(ABlasterCharacter, color);
+	DOREPLIFETIME(ABlasterCharacter, team);
 
 }
 
@@ -97,16 +102,57 @@ void ABlasterCharacter::BeginPlay()
 	animInstance = Cast<UBlasterAnimInstance>(GetMesh()->GetAnimInstance());
 
 	pc = Cast<ABlasterPlayerController>(GetController());
+
+	ps = Cast<ABlasterPlayerState>(GetPlayerState());
 	//서버에서 hp를 변경하고 복제된다
 	if(HasAuthority())
 	{
 		curHP = maxHP;
+	}
+
+	//서버에서 부활하면 실행되지 않는 이유
+	if(pc&&pc->IsLocalController())
+	{
+		FString isServer = HasAuthority() ? FString("server") : FString("client");
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("UIIUIUIUIUIU : %s"), *isServer));
+		UI = pc->playerUIWidget;
+	}
+	if(ps)
+	{
+		ps->SetTeamDele.AddUObject(this, &ABlasterCharacter::ServerSetTeam);
+	}
+
+	//색상변경 준비
+	UMaterialInterface* base_mat = GetMesh()->GetMaterial(0);
+	if (base_mat)
+	{
+		mat = UMaterialInstanceDynamic::Create(base_mat, this);
+		GetMesh()->SetMaterial(0, mat);
 	}
 }
 
 void ABlasterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if(!pc)
+	{
+		pc = Cast<ABlasterPlayerController>(GetController());
+	}
+	if(!ps)
+	{
+		ps = Cast<ABlasterPlayerState>(GetPlayerState());
+		if(ps)
+		{
+			ps->SetTeamDele.AddUObject(this, &ABlasterCharacter::ServerSetTeam);
+		}
+	}
+
+	if(mat && !bSetColor)
+	{
+		ServerSetTeamColor();
+		bSetColor = true;
+	}
 }
 
 void ABlasterCharacter::MoveForward(float Value)
@@ -241,6 +287,8 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction(TEXT("Crouch"), IE_Pressed, this, &ABlasterCharacter::CrouchButtonPressed);
 	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Pressed, this, &ABlasterCharacter::AimPressed);
 	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &ABlasterCharacter::AimReleased);
+	PlayerInputComponent->BindAction(TEXT("ViewInfo"), IE_Pressed, this, &ABlasterCharacter::ViewInfo);
+	PlayerInputComponent->BindAction(TEXT("ViewInfo"), IE_Released, this, &ABlasterCharacter::HideInfo);
 
 
 }
@@ -284,42 +332,32 @@ bool ABlasterCharacter::IsAiming()
 	return (Combat && Combat->bAiming);
 }
 
-void ABlasterCharacter::DecreaseHP(int32 value)
+void ABlasterCharacter::DecreaseHP(int32 value, class ABlasterCharacter* dealer)
 {
 	curHP -= value;
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("%d"), curHP));
 
 	if(curHP <= 0)
 	{
+		FString isServer = HasAuthority() ? FString("server") : FString("client");
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("curHP : %s"), *isServer));
 		DieProcess();
+
+		//델리게이트를 플레이어 스테이트에 브로드케스트한다
+		//Cast<UBlasterGameInstance>(GetGameInstance())->KillDelegate.Broadcast(dealer);
+		ABlasterPlayerState* enemyps = Cast<ABlasterPlayerState>(dealer->GetPlayerState());
+		enemyps->SetKillCount(1);
+		if (ps)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 30.f, FColor::Red, FString::Printf(TEXT("SetDeathCount")));
+			ps->SetDeathCount(1);
+		}
 	}
 }
 
 void ABlasterCharacter::DieProcess()
 {
 	MultiPlayDie();
-
-	
-		FTimerHandle TimerHandle_Death;
-		GetWorldTimerManager().SetTimer(TimerHandle_Death, FTimerDelegate::CreateLambda([&]()
-		{
-			//게임모드가 있는 서버에서 포제스를 한다
-			if(HasAuthority())
-			{
-				ChangeSpectatorMode();
-			}
-
-			//위젯이 있는 로컬 플레이어에서 위젯을 설정한다
-			if(GetController() && GetController()->IsLocalController())
-			{
-				if(pc->playerUIWidget)
-				{
-					pc->playerUIWidget->SetRespawnWidget();
-					SetWidget();
-				}
-			}
-		}), 1.5f, false);
-	
 }
 
 void ABlasterCharacter::ChangeSpectatorMode()
@@ -358,29 +396,98 @@ void ABlasterCharacter::ChangeSpectatorMode()
 
 void ABlasterCharacter::SetWidget()
 {
-
-	FTimerHandle TimerHandle_Respawn;
-	GetWorldTimerManager().SetTimer(TimerHandle_Respawn, FTimerDelegate::CreateLambda([&]()
+	FTimerHandle TimerHandle_UI;
+	GetWorldTimerManager().SetTimer(TimerHandle_UI, FTimerDelegate::CreateLambda([&]()
 		{
-			pc->playerUIWidget->SetCombatWidget();
-			;
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("CombatUI")));
+			UI->SetCombatWidget();
 		}), respawnTime, false);
 }
 
 void ABlasterCharacter::MultiPlayDie_Implementation()
 {
-	
+	//로컬에서 플레이어 스테이트를 연다
+
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("play die"));
 	animInstance->bDie = true;
 	GetCharacterMovement()->DisableMovement();
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	bUseControllerRotationYaw = false;
+	FTimerHandle TimerHandle_Death;
+	GetWorldTimerManager().SetTimer(TimerHandle_Death, FTimerDelegate::CreateLambda([&]()
+		{
+			//게임모드가 있는 서버에서 포제스를 한다
+			if (HasAuthority())
+			{
+				ChangeSpectatorMode();
+			}
+			
+			//위젯이 있는 로컬 플레이어에서 위젯을 설정한다
+			//if (GetController() && GetController()->IsLocalController())
+			//{
+				if (UI)
+				{
+					//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("RespawnUI")));
+					//위젯이 있는 로컬에서 데스카운트를 설정한다
+					UI->SetRespawnWidget();
+					SetWidget();
+				}
+			//}
+		}), 1.5f, false);
 }
 
-void ABlasterCharacter::ServerOnDamage_Implementation(int32 value)
+void ABlasterCharacter::ServerOnDamage_Implementation(int32 value, ABlasterCharacter* dealer)
 {
-	DecreaseHP(value);
+	DecreaseHP(value, dealer);
+	FString isServer = HasAuthority() ? FString("server") : FString("client");
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("ServerOnDamagme : %s"), *isServer));
 }
 
+void ABlasterCharacter::ViewInfo()
+{
+	if(UI)
+	{
+		UI->ViewInfo(true);
+	}
+}
 
+void ABlasterCharacter::HideInfo()
+{
+	if (UI)
+	{
+		UI->ViewInfo(false);
+	}
+}
+
+void ABlasterCharacter::ServerSetTeamColor_Implementation()
+{
+	MultiSetTeamColor();
+}
+
+void ABlasterCharacter::MultiSetTeamColor_Implementation()
+{
+	//MultiSetTeamColor(value);
+	FString isServer = HasAuthority() ? FString("server") : FString("client");
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("ServerCCCCCCCCCC : %s"), *isServer));
+	if (team == 1)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("MUltiSetTeamColor"));
+		//red
+		mat->SetVectorParameterValue(FName("Color_Multiplier"), (FLinearColor)FVector(1, 0.125397, 0));
+	}
+	else if (team == 2)
+	{
+		//blue
+		mat->SetVectorParameterValue(FName("Color_Multiplier"), (FLinearColor)FVector(0.108294, 0.218351, 1));
+	}
+}
+
+void ABlasterCharacter::ServerSetTeam_Implementation(int32 value)
+{
+	if (!ps)
+	{
+		return;
+	}
+	team = ps->team;
+}

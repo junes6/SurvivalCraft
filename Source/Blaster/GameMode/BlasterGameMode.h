@@ -13,5 +13,8 @@ UCLASS()
 class BLASTER_API ABlasterGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
+
+public:
+
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 };

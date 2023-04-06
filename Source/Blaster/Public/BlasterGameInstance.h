@@ -15,5 +15,5 @@ class BLASTER_API UBlasterGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
-
+public:
 };

@@ -36,7 +36,7 @@ void AGun_Bullet::BeginPlay()
 	meshComp->OnComponentHit.AddDynamic(this, &AGun_Bullet::DestroyBullet);
 
 	FString myLocalRole = UEnum::GetValueAsString<ENetRole>(GetLocalRole());
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, myLocalRole);
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, myLocalRole);
 }
 
 // Called every frame
@@ -60,15 +60,14 @@ void AGun_Bullet::Tick(float DeltaTime)
 			{
 				if (gunFireComp)
 				{
-					player->ServerOnDamage(gunFireComp->weaponPower);
-					GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("trace"));
+					player->ServerOnDamage(gunFireComp->weaponPower, Cast<ABlasterCharacter>(GetOwner()));
+					//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("trace"));
 				}
 				//총알이 플레이어에게 데미지를 주면 ignoreActor를 추가해서 상호작용 x
 				params.AddIgnoredActor(player);
 			}
 		}
 	}
-
 }
 
 void AGun_Bullet::Destroyed()
@@ -85,7 +84,7 @@ void AGun_Bullet::ServerPlayerDamage_Implementation(ABlasterCharacter* player)
 {
 	if(player&&gunFireComp)
 	{
-		player->DecreaseHP(gunFireComp->weaponPower);
+		//player->DecreaseHP(gunFireComp->weaponPower);
 	}
 }
 
@@ -101,7 +100,7 @@ void AGun_Bullet::OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("No Player"));
+		//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("No Player"));
 	}
 }
 

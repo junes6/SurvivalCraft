@@ -8,6 +8,7 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FSetUpInputDelegate, class UInputComponent*);
 
+
 UCLASS()
 class BLASTER_API ABlasterCharacter : public ACharacter
 {
@@ -112,10 +113,10 @@ public:
 	FORCEINLINE int32 Get_curHP(){ return curHP; };
 
 	UFUNCTION()
-	void DecreaseHP(int32 value);
+	void DecreaseHP(int32 value, class ABlasterCharacter* dealer);
 
 	UFUNCTION(Server, Unreliable)
-	void ServerOnDamage(int32 value);
+	void ServerOnDamage(int32 value, class ABlasterCharacter* dealer);
 
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* Anim_Reload;
@@ -141,6 +142,9 @@ public:
 	UPROPERTY()
 	class ABlasterPlayerController* pc;
 
+	UPROPERTY()
+	class ABlasterPlayerState* ps;
+
 	UFUNCTION()
 	void ChangeSpectatorMode();
 
@@ -155,5 +159,35 @@ public:
 
 	UPROPERTY(EditAnywhere, Category=MySetting)
 	float respawnTime = 4;
+
+	UPROPERTY()
+	class UPlayerUIWidget* UI;
+
+	UFUNCTION()
+	void ViewInfo();
+
+	UFUNCTION()
+	void HideInfo();
+
+	UPROPERTY(Replicated)
+	int32 team;
+
+	UFUNCTION(Server, Unreliable)
+	void ServerSetTeam(int32 value);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MultiSetTeamColor();
+
+	UFUNCTION(Server, Unreliable)
+	void ServerSetTeamColor();
+
+	UPROPERTY()
+	class UMaterialInstanceDynamic* mat;
+
+	UPROPERTY(Replicated)
+	FVector color;
+
+	UPROPERTY()
+	bool bSetColor = false;
 
 };

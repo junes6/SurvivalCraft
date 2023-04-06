@@ -95,7 +95,7 @@ void UGunFireComponent::GunFire()
 
 void UGunFireComponent::GunFireStop()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("endFire"), true);
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("endFire"), true);
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandle_AutoFire);
 	recoilCount = 0;
 }
@@ -166,7 +166,7 @@ void UGunFireComponent::MulitSpawnBullet_Implementation(FVector spawnLoc, FRotat
 //클라이언트의 로테이션을 받는다 (서버실행)
 void UGunFireComponent::ServerSpawnBullet_Implementation(FVector spawnLoc, FRotator spawnRot)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("fire"), true);
+	//GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Blue, TEXT("fire"), true);
 	//GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, spawnRot);
 	AGun_Bullet* SpawnedBullet = GetWorld()->SpawnActor<AGun_Bullet>(bullet, spawnLoc, spawnRot);
 

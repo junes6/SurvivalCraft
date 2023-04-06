@@ -17,8 +17,16 @@ class BLASTER_API ABlasterPlayerController : public APlayerController
 public:
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaSeconds) override;
+
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UPlayerUIWidget> playerUI;
+
+	UPROPERTY()
+	class ABlasterPlayerState* ps;
+
+	UPROPERTY()
+	class ABlasterGameState* gs;
 
 	UPROPERTY()
 	class UPlayerUIWidget* playerUIWidget;
