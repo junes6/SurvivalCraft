@@ -151,8 +151,8 @@ void ABlasterCharacter::Tick(float DeltaTime)
 	if(mat && !bSetColor)
 	{
 		ServerSetTeamColor();
-		bSetColor = true;
 	}
+	DrawDebugString(GetWorld(), GetActorLocation(), FString::Printf(TEXT("%d"), team), nullptr, FColor::White, 0.0, true, 1.0f);
 }
 
 void ABlasterCharacter::MoveForward(float Value)
@@ -470,16 +470,20 @@ void ABlasterCharacter::MultiSetTeamColor_Implementation()
 	//MultiSetTeamColor(value);
 	FString isServer = HasAuthority() ? FString("server") : FString("client");
 	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, FString::Printf(TEXT("ServerCCCCCCCCCC : %s"), *isServer));
+
+	if(!mat){return;}
 	if (team == 1)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("MUltiSetTeamColor"));
 		//red
 		mat->SetVectorParameterValue(FName("Color_Multiplier"), (FLinearColor)FVector(1, 0.125397, 0));
+		bSetColor = true;
 	}
 	else if (team == 2)
 	{
 		//blue
 		mat->SetVectorParameterValue(FName("Color_Multiplier"), (FLinearColor)FVector(0.108294, 0.218351, 1));
+		bSetColor = true;
 	}
 }
 
